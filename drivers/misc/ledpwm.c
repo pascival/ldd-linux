@@ -24,16 +24,16 @@ static const unsigned long LED0_ADDRESS = 0xFF203080;
 static const unsigned long LED9_ADDRESS = 0xFF2030A4;
 static const unsigned long address_size = 8;
 static const unsigned int led_on = 0x7ff;
-static const unsigned int led_off; //0x000
+static const unsigned int led_off;
 static unsigned int dimming_values[8] = { 0x400, 0x200, 0x100, 0x080,
 					  0x040, 0x020, 0x010, 0x008 };
-static u32 __iomem *io_addr; //0
+static u32 __iomem *io_addr;
 static const size_t led_count = 8;
-static unsigned int runled_counter; //0
+static unsigned int runled_counter;
 
 struct led9 {
 	struct cdev cdev;
-	u32 *registers; // dummy
+	u32 *registers;
 };
 
 static struct led9 device_data;
@@ -102,19 +102,19 @@ static ssize_t led9_read(struct file *filep, char __user *buf, size_t count,
 	struct led9 *data = filep->private_data;
 
 	/* End of file */
-	if (*offp >= 4)
+	if (*offp >= 1)
 		return 0;
 
 	printk(KERN_INFO "In %s. count: %d, off: %lld\n", __func__, count,
 	       *offp);
 
 	/* Small buffers */
-	if (count < 4)
+	if (count < 1)
 		return -ETOOSMALL;
 
 	led_value = ioread32(data->registers);
 
-	/* convert to percent */
+	/* Convert to percent */
 	if (led_value >= 0 && led_value <= 2047)
 		calcValue = led_value * 100 / 2047;
 
@@ -124,8 +124,8 @@ static ssize_t led9_read(struct file *filep, char __user *buf, size_t count,
 	if (status != 0)
 		return -1;
 
-	*offp += 4;
-	return 4;
+	*offp += 1;
+	return 1;
 } /* End led9_read() */
 
 /* Write to character device function */
