@@ -120,6 +120,7 @@ static int key_remove(struct platform_device *pdev)
 
 	/* Release kfifo */
 	kfifo_free(&key->fifo);
+	// mutex_destroy
 
 	misc_deregister(&key->misc);
 	platform_set_drvdata(pdev, NULL);
@@ -194,6 +195,7 @@ static ssize_t key_read(struct file *filep, char __user *buf, size_t count,
 
 	/* Wait for event if buffer is empty */
 	wait_event_interruptible(key->queue, kfifo_len(&key->fifo) != 0);
+	//returnt beu unterbrechung ungleich 0 -> fall behandeln
 
 	/* Read kfifo */
 	fifo_size = kfifo_out_spinlocked(&key->fifo, button_buff, FIFO_SIZE,
