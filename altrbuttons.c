@@ -24,12 +24,16 @@ int main(int argc, char **argv)
 
 	// virtuell auf physischen berech ummappen
 	fd = open(UIO_NODE, O_RDWR);
-	if (!fd)
+	if (fd < 0) {
+		perror("uio open");
 		return -1;
+	}
 
 	size_fp = fopen(UIO_SIZE, "r");
-	if (!size_fp)
+	if (size_fp < 0) {
+		perror("fopen size");
 		return -1;
+	}
 	fscanf(size_fp, "0x%016X", &uio_size);
 
 	uio_map = mmap(0, uio_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -41,14 +45,17 @@ int main(int argc, char **argv)
 	}
 
 	// enable interrupt
-	*(uio_map + IRQ_OFFSET) = 0xF;
 	*(uio_map + EDGE_OFFSET) = 0xF;
+	*(uio_map + IRQ_OFFSET) = 0xF;
 
 	read(fd, &io, 4);
-	printf("Detected button presses: %d\n", io);
+	printf("Detected button press: %d\n", *(uio_map + EDGE_OFFSET));
 
 	io = 1;
 	write(fd, &io, 4); // re-activates interrupts
+
+	// decativate irq
+	*(uio_map + IRQ_OFFSET) = 0x0;
 
 	// Un-map and close files
 	munmap(uio_map, uio_size);

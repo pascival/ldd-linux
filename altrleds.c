@@ -45,8 +45,10 @@ int main(int argc, char **argv)
 
 	int i = 0;
 	int fd = open("/dev/mem", O_RDWR | O_SYNC);
-	if (!fd)
+	if (fd < 0) {
+		perror("open");
 		return -1;
+	}
 
 	int pagesize = getpagesize();
 	int virt_addr = BASE_ADDR & ~(pagesize - 1);
